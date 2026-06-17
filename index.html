@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlowRoll Dojo</title>
+  <meta name="theme-color" content="#1a1a2e" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView" class="view active">
+  <div class="login-hero">
+    <div class="belt-stripe"></div>
+    <div class="login-content">
+      <div class="dojo-logo">🥋</div>
+      <h1 class="dojo-title">FlowRoll</h1>
+      <p class="dojo-sub">Sistema del Dojo</p>
+      <div class="role-cards">
+        <button class="role-card" onclick="enterAlumno()">
+          <i class="fa-solid fa-user"></i>
+          <span>Soy Alumno</span>
+        </button>
+        <button class="role-card role-card--sensei" onclick="showPin()">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Soy Sensei</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN SENSEI -->
+<div id="pinView" class="view">
+  <div class="pin-screen">
+    <button class="back-link" onclick="backToLogin()"><i class="fa-solid fa-arrow-left"></i> Volver</button>
+    <div class="dojo-logo">🛡️</div>
+    <h2>Acceso Sensei</h2>
+    <p class="muted">Ingresa tu PIN de 4 dígitos</p>
+    <input type="password" id="pinInput" maxlength="4" placeholder="• • • •" class="pin-input" oninput="checkPin(this)" />
+    <p id="pinError" class="error-msg" style="display:none">PIN incorrecto. Inténtalo de nuevo.</p>
+    <p class="muted" style="font-size:12px;margin-top:1rem;">PIN predeterminado: <strong>1234</strong></p>
+  </div>
+</div>
+
+<!-- VISTA ALUMNO -->
+<div id="alumnoView" class="view">
+  <header class="app-header">
+    <button class="icon-btn" onclick="backToLogin()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="header-title">
+      <span class="header-logo">🥋</span>
+      <span>FlowRoll</span>
+    </div>
+    <div style="width:36px"></div>
+  </header>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchAlumnoTab('asistencia', this)" data-tab="asistencia">
+      <i class="fa-solid fa-calendar-check"></i><span>Asistencia</span>
+    </button>
+    <button class="nav-btn" onclick="switchAlumnoTab('videos', this)" data-tab="videos">
+      <i class="fa-solid fa-video"></i><span>Técnicas</span>
+    </button>
+  </nav>
+
+  <main class="app-main">
+    <div id="alumnoAsistencia" class="tab-section active">
+      <div class="date-banner" id="fechaBanner"></div>
+      <div class="section-card">
+        <label class="field-label">¿Quién eres?</label>
+        <select id="alumnoSeleccionado" class="field-select" onchange="onAlumnoChange()">
+          <option value="">— Selecciona tu nombre —</option>
+        </select>
+      </div>
+      <div id="marcarArea" style="display:none">
+        <div class="alumno-card" id="alumnoCardPreview"></div>
+        <button class="btn-primary" id="btnMarcar" onclick="marcarAsistencia()">
+          <i class="fa-solid fa-circle-check"></i> Marcar mi asistencia
+        </button>
+      </div>
+      <div id="yaRegistrado" class="success-banner" style="display:none">
+        <i class="fa-solid fa-circle-check fa-2x"></i>
+        <p>¡Asistencia registrada!</p>
+        <span>El Sensei confirmará al final de la clase.</span>
+      </div>
+    </div>
+
+    <div id="alumnoVideos" class="tab-section">
+      <h2 class="section-title">Videos de técnicas</h2>
+      <div id="videosListAlumno" class="videos-grid"></div>
+    </div>
+  </main>
+</div>
+
+<!-- VISTA SENSEI -->
+<div id="senseiView" class="view">
+  <header class="app-header app-header--sensei">
+    <button class="icon-btn" onclick="backToLogin()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="header-title">
+      <span class="header-logo">🛡️</span>
+      <span>Panel Sensei</span>
+    </div>
+    <div style="width:36px"></div>
+  </header>
+
+  <nav class="bottom-nav bottom-nav--sensei">
+    <button class="nav-btn active" onclick="switchSenseiTab('asistencia', this)">
+      <i class="fa-solid fa-calendar-check"></i><span>Asistencia</span>
+    </button>
+    <button class="nav-btn" onclick="switchSenseiTab('alumnos', this)">
+      <i class="fa-solid fa-users"></i><span>Alumnos</span>
+    </button>
+    <button class="nav-btn" onclick="switchSenseiTab('videos', this)">
+      <i class="fa-solid fa-video"></i><span>Videos</span>
+    </button>
+  </nav>
+
+  <main class="app-main">
+    <div id="senseiAsistencia" class="tab-section active">
+      <div class="date-banner" id="fechaBannerSensei"></div>
+      <div class="metrics-row" id="metricsRow"></div>
+      <h2 class="section-title">Lista de hoy</h2>
+      <div id="asistenciaList"></div>
+    </div>
+
+    <div id="senseiAlumnos" class="tab-section">
+      <h2 class="section-title">Alumnos registrados</h2>
+      <div class="add-form">
+        <input id="nuevoNombre" class="field-input" placeholder="Nombre completo" />
+        <input id="nuevoNivel" class="field-input" placeholder="Nivel (ej: Cinturón azul)" />
+        <button class="btn-primary" onclick="agregarAlumno()"><i class="fa-solid fa-plus"></i> Agregar</button>
+      </div>
+      <div id="alumnosList"></div>
+    </div>
+
+    <div id="senseiVideos" class="tab-section">
+      <h2 class="section-title">Videos de técnicas</h2>
+      <button class="btn-primary" onclick="abrirModal()" style="margin-bottom:1rem">
+        <i class="fa-solid fa-plus"></i> Agregar video
+      </button>
+      <div id="videosListSensei" class="videos-grid"></div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL VIDEO -->
+<div class="modal-overlay" id="videoModal" onclick="cerrarModal(event)">
+  <div class="modal-box">
+    <h3>Agregar video</h3>
+    <label class="field-label">Título</label>
+    <input id="vTitulo" class="field-input" placeholder="Ej: Barrido de pierna" />
+    <label class="field-label">URL de YouTube</label>
+    <input id="vUrl" class="field-input" placeholder="https://youtube.com/watch?v=..." />
+    <label class="field-label">Descripción (opcional)</label>
+    <textarea id="vDesc" class="field-input" rows="2" placeholder="Notas sobre la técnica..."></textarea>
+    <div class="modal-btns">
+      <button class="btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarVideo()"><i class="fa-solid fa-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
